@@ -7,29 +7,68 @@
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked@12.0.0/lib/marked.umd.min.js"></script>
     <!-- Umami 统计 -->
-    <!-- <script async defer data-website-id="YOUR_UMAMI_ID" src="https://YOUR_UMAMI_URL/script.js"></script> -->
+    <script defer src="https://cloud.umami.is/script.js" data-website-id="b1179632-20e3-451e-86c9-6b3546f4e80d"></script>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Side Projects</h1>
-            <div class="stats">访问统计：<span id="counter">Loading...</span></div>
-        </header>
-        <main id="projects-container"></main>
+    <div class="layout">
+        <!-- 侧边栏 -->
+        <aside class="sidebar">
+            <div class="profile">
+                <div class="avatar">
+                    <!-- 这里可以替换成你的头像图片 -->
+                    <img src="https://avatars.githubusercontent.com/u/583231?v=4" alt="Avatar">
+                </div>
+                <h2 class="name">GAVIN</h2>
+                <p class="bio">Full-stack developer, open source enthusiast.</p>
+                <div class="social-links">
+                    <a href="https://github.com/yuexiwei" target="_blank" class="social-link">
+                        <svg class="icon" viewBox="0 0 16 16" width="16" height="16">
+                            <path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+                        </svg>
+                        GitHub
+                    </a>
+                    <a href="https://twitter.com/yuexiwei" target="_blank" class="social-link">
+                        <svg class="icon" viewBox="0 0 24 24" width="16" height="16">
+                            <path fill="currentColor" d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                        </svg>
+                        Twitter
+                    </a>
+                    <a href="mailto:im@yxw.im" class="social-link">
+                        <svg class="icon" viewBox="0 0 16 16" width="16" height="16">
+                            <path fill="currentColor" d="M1.75 2h12.5c.966 0 1.75.784 1.75 1.75v8.5A1.75 1.75 0 0114.25 14H1.75A1.75 1.75 0 010 12.25v-8.5C0 2.784.784 2 1.75 2zm0 1.75v8.5h12.5v-8.5H1.75zm-.25 0h13v8.5H1.5v-8.5zm6.854 2.632l4.142 3.972a.75.75 0 11-1.036 1.085L8 8.908l-3.46 2.531a.75.75 0 01-1.036-1.085l4.142-3.972a.75.75 0 011.036 0z"/>
+                        </svg>
+                        Email
+                    </a>
+                </div>
+            </div>
+        </aside>
+
+        <!-- 主内容区 -->
+        <main class="main-content">
+            <header>
+                <h1>Side Projects</h1>
+                <div class="stats">访问统计：<span id="counter">Loading...</span></div>
+            </header>
+            <div id="projects-container"></div>
+        </main>
     </div>
 
     <script>
+        // 获取 marked 实例
         const { marked } = window;
         
+        // 配置 marked 选项
         marked.use({
             breaks: true,
             gfm: true
         });
 
+        // 创建一个状态管理对象
         const renderState = {
             isFirstHeading: true
         };
 
+        // 自定义渲染扩展
         marked.use({
             extensions: [{
                 name: 'project-card',
@@ -39,6 +78,7 @@
                         const cardStart = renderState.isFirstHeading ? '' : '</article>';
                         renderState.isFirstHeading = false;
                         
+                        // 检查标题中是否包含链接
                         const linkMatch = token.text.match(/\[([^\]]+)\]\(([^)]+)\)/);
                         let titleHtml;
                         if (linkMatch) {
@@ -133,27 +173,46 @@
         // 加载并渲染 Markdown 内容
         async function loadAndRenderMarkdown() {
             try {
+                // 使用 fetch 加载 README.md 文件
                 const response = await fetch('README.md');
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 const mdContent = await response.text();
                 
+                // 检查内容是否为空
+                if (!mdContent.trim()) {
+                    throw new Error('README file is empty');
+                }
+                
+                // 重置渲染状态
                 renderState.isFirstHeading = true;
                 
+                // 使用 marked 渲染内容
                 let html = marked.parse(mdContent);
                 if (!html.endsWith('</article>')) {
                     html += '</article>';
                 }
                 
+                // 将渲染后的 HTML 插入到页面中
                 document.getElementById('projects-container').innerHTML = html;
             } catch (error) {
                 console.error('Error loading markdown:', error);
                 document.getElementById('projects-container').innerHTML = 
-                    '<p class="error">Error loading project data. Please try again later.</p>';
+                    `<div class="error-message">
+                        <h3>加载失败</h3>
+                        <p>无法加载项目数据，请检查以下内容：</p>
+                        <ul>
+                            <li>README.md 文件是否存在</li>
+                            <li>文件内容是否符合格式要求</li>
+                            <li>服务器是否正常运行</li>
+                        </ul>
+                        <p>错误详情：${error.message}</p>
+                    </div>`;
             }
         }
 
+        // 当 DOM 加载完成后执行渲染
         document.addEventListener('DOMContentLoaded', loadAndRenderMarkdown);
     </script>
 </body>
